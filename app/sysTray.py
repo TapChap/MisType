@@ -34,9 +34,9 @@ def changeHotkey(icon, item):
         def on_submit(event=None):
             text = entry.get()
             if text:
-                app.change_hotkey(" + ".join(text.lower().replace(' ', '').split(',')))
+                app.change_hotkey("+".join(text.lower().replace(' ', '').split(',')))
             input_dialog.destroy()
-            root.quit()
+            root.destroy()
 
         submit_btn = tk.Button(input_dialog, text="Submit", command=on_submit)
         submit_btn.pack(pady=10)
