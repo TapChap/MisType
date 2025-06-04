@@ -1,5 +1,4 @@
-import os
-import time, pyperclip, string_converter
+import time, pyperclip, string_converter, os
 import keyboard as kb
 
 from pynput.keyboard import Key, Controller
@@ -23,6 +22,7 @@ def handle_hotkey(keyboard):
 
     # convert the bad text to the correct language and paste it
     text = pyperclip.paste()
+    print(text)
     kb.write(string_converter.convert(text))
 
     # change pc language

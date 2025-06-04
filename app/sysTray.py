@@ -3,34 +3,27 @@ from PIL import Image
 import tkinter as tk
 import threading, sys, app, os
 
-global keyboard_thread
-
-# Create an icon image
-def create_image():
+def GetImage():
     path = os.path.join(sys._MEIPASS, 'translate_icon.ico')
 
     return Image.open(path)
 
 # Quit action
 def on_quit(icon, item):
-    global keyboard_thread
-
     app.quit()        # Your custom cleanup logic
     icon.stop()
     sys.exit()
 
 # Text input popup
-def prompt_for_text(icon, item):
+def changeHotkey(icon, item):
     # Run tkinter in main thread
-    def run_input():
+    def create_text_field():
         root = tk.Tk()
         root.withdraw()  # Hide the main window
 
         input_dialog = tk.Toplevel()
         input_dialog.title("MisType")
-
-        # Set desired width here (e.g. 400px)
-        input_dialog.geometry("400x120")
+        input_dialog.geometry("300x120")
 
         label = tk.Label(input_dialog, text="Enter new hotkey (separated by ','):")
         label.pack(pady=10)
@@ -38,7 +31,7 @@ def prompt_for_text(icon, item):
         entry = tk.Entry(input_dialog, width=50)
         entry.pack(padx=20)
 
-        def on_submit(event = None):
+        def on_submit(event=None):
             text = entry.get()
             if text:
                 app.change_hotkey(" + ".join(text.lower().replace(' ', '').split(',')))
@@ -53,15 +46,15 @@ def prompt_for_text(icon, item):
         input_dialog.protocol("WM_DELETE_WINDOW", root.quit)
         root.mainloop()
 
-    threading.Thread(target=run_input).start()
+    threading.Thread(target=create_text_field).start()
 
 # Setup tray icon
 def setup_tray():
     icon = Icon("MisType")
-    icon.icon = create_image()
+    icon.icon = GetImage()
     icon.menu = Menu(
         MenuItem('Quit', on_quit),
-        MenuItem('Change hotkey', prompt_for_text)
+        MenuItem('Change hotkey', changeHotkey)
     )
     icon.run()
 

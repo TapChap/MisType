@@ -1,5 +1,4 @@
 import sys
-
 from dictionary import ENtoHE, HEtoEN
 
 def is_he(string):
