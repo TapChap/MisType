@@ -71,6 +71,8 @@ This seamless process allows you to continue typing without interruption.
    4. copy the executable shortcut to the startup folder.
    5. Congrats, MisType should now automatically start on Windows startup
 
+## ~~Or just download and run the MisType.exe file 🥴~~
+
 ## Usage
 
 1. **Typing Correction**
