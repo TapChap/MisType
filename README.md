@@ -62,6 +62,15 @@ This seamless process allows you to continue typing without interruption.
 
    The application will run in the background with a system tray icon for easy access.
 
+4. **Luanch MisType on startup (Optional)**
+
+   if you would like MisType to launch on windows startup, follow these steps:
+   1. Right click the MisType.exe file and create a shortcut.
+   2. Open the windows run app by hitting Windows + R
+   3. type ```shell:startup```
+   4. copy the executable shortcut to the startup folder.
+   5. Congrats, MisType should now automatically start on Windows startup
+
 ## Usage
 
 1. **Typing Correction**
