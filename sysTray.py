@@ -1,16 +1,15 @@
 from pystray import Icon, Menu, MenuItem
 from PIL import Image
 import tkinter as tk
-from tkinter import simpledialog
-import threading
-import sys
-import app
+import threading, sys, app, os
 
 global keyboard_thread
 
 # Create an icon image
 def create_image():
-    return Image.open('translate_icon.ico')
+    path = os.path.join(sys._MEIPASS, 'translate_icon.ico')
+
+    return Image.open(path)
 
 # Quit action
 def on_quit(icon, item):

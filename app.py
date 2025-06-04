@@ -1,5 +1,5 @@
 import os
-import time, pyperclip, sys, string_converter
+import time, pyperclip, string_converter
 import keyboard as kw
 
 from pynput.keyboard import Key, Controller
