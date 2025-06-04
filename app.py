@@ -1,3 +1,4 @@
+import os
 import time, pyperclip, sys, string_converter
 import keyboard as kw
 
@@ -29,9 +30,19 @@ def handle_hotkey(keyboard):
     # change pc language
     kw.press_and_release('alt + shift')
 
-if __name__ == '__main__':
-    hotkey_comb = sys.argv[1]
-    keyboard = Controller()
+def change_hotkey(new_hotkey):
+    kw.unhook_all()
+    kw.add_hotkey(new_hotkey, lambda: handle_hotkey(Controller()))
 
-    kw.add_hotkey(hotkey_comb, lambda: handle_hotkey(keyboard))
-    kw.wait('esc')
+def quit():
+    # kw.press_and_release('esc')
+    kw.unhook_all()
+    os._exit(0)
+    exit(0)
+
+def main():
+    kw.add_hotkey('alt + shift + z', lambda: handle_hotkey(Controller()))
+    kw.wait()
+
+if __name__ == '__main__':
+    main()
