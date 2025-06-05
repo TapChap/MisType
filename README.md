@@ -62,7 +62,7 @@ This seamless process allows you to continue typing without interruption.
 
    The application will run in the background with a system tray icon for easy access.
 
-## ~~Or just download and run the MisType.exe file 🥴~~
+## ~~Or just download and run the MisType.exe file from the latest release 🥴~~
 
 5. **Luanch MisType on startup (Optional)**
 
