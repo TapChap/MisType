@@ -39,6 +39,9 @@ def handle_hotkey(keyboard):
     # change pc language
     kb.press_and_release('alt + shift')
 
+def app_open_clipboard(__):
+    kb.press_and_release('win + v')
+
 def change_hotkey(new_hotkey):
     global hotkey
     hotkey = new_hotkey

@@ -3,3 +3,4 @@ pystray
 keyboard
 pyperclip
 pynput
+win11toast

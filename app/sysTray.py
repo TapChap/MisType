@@ -1,21 +1,23 @@
 from pystray import Icon, Menu, MenuItem
 from PIL import Image
+from win11toast import toast
 import tkinter as tk
-import threading, sys, app, os
+import threading, sys, app, os, winreg
 
-def GetImage():
-    path = os.path.join(sys._MEIPASS, 'translate_icon.ico')
-
-    return Image.open(path)
+def get_image():
+    try:
+        return Image.open(os.path.join(sys._MEIPASS, 'translate_icon.ico'))
+    except AttributeError:
+        return Image.open('../translate_icon.ico')
 
 # Quit action
-def on_quit(icon, item):
+def on_quit(icon):
     app.quit()        # Your custom cleanup logic
     icon.stop()
     sys.exit()
 
 # Text input popup
-def changeHotkey(icon, item):
+def changeHotkey():
     # Run tkinter in main thread
     def create_text_field():
         root = tk.Tk()
@@ -48,13 +50,34 @@ def changeHotkey(icon, item):
 
     threading.Thread(target=create_text_field).start()
 
+def enable_clipboard_history():
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,r"Software\Microsoft\Clipboard", 0, winreg.KEY_SET_VALUE)
+    except FileNotFoundError:
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Clipboard")
+
+    winreg.SetValueEx(key, "EnableClipboardHistory", 0, winreg.REG_DWORD, 1)
+    winreg.CloseKey(key)
+
+    show_clipboard_toast()
+
+
+def show_clipboard_toast():
+    toast(
+        "📋 Clipboard History Enabled",
+        "Press Win + V to access your clipboard history!",
+        duration="short",  # or 'long'
+        on_click=app.app_open_clipboard
+    )
+
 # Setup tray icon
 def setup_tray():
     icon = Icon("MisType")
-    icon.icon = GetImage()
+    icon.icon = get_image()
     icon.menu = Menu(
         MenuItem('Quit', on_quit),
-        MenuItem('Change hotkey', changeHotkey)
+        MenuItem('Change hotkey', changeHotkey),
+        MenuItem('Enable clipboard History', enable_clipboard_history)
     )
     icon.run()
 
