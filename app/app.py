@@ -34,6 +34,7 @@ def handle_hotkey(keyboard):
 
     # convert the bad text to the correct language and paste it
     text = pyperclip.paste()
+    print(text)
     kb.write(string_converter.convert(text))
 
     # change pc language
