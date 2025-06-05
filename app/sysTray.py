@@ -20,79 +20,66 @@ def on_quit(icon):
 # Text input popup
 def changeHotkey():
     # Run tkinter in main thread
-
     def create_text_field():
-        root = tk.Tk()
-        root.withdraw()  # Hide the main root window
-
-        # Setup dialog
-        input_dialog = tk.Toplevel()
-        input_dialog.title("Change Hotkey")
-        input_dialog.geometry("320x260")
-        input_dialog.resizable(False, False)
-
-        # Use ttk style for modern appearance
-        style = ttk.Style()
-        style.theme_use('clam')  # Modern look; try 'vista', 'alt', or 'clam'
-
-        main_frame = ttk.Frame(input_dialog, padding=20)
-        main_frame.pack(fill='both', expand=True)
-
-        # Title
-        ttk.Label(main_frame, text="Customize Hotkey", font=("Segoe UI", 12, "bold")).pack(pady=(0, 10))
-
-        # Modifier checkboxes
-        ttk.Label(main_frame, text="Select modifier keys:").pack(anchor='w')
-
-        modifiers = {
-            "ctrl": tk.BooleanVar(),
-            "alt": tk.BooleanVar(),
-            "shift": tk.BooleanVar(),
-            "windows": tk.BooleanVar()
-        }
-
-        check_frame = ttk.Frame(main_frame)
-        check_frame.pack(anchor='w', pady=5)
-
-        for key, var in modifiers.items():
-            ttk.Checkbutton(check_frame, text=key.capitalize(), variable=var).pack(side='left', padx=5)
-
-        # Key entry
-        ttk.Label(main_frame, text="\nEnter the main key:").pack(anchor='w')
-        key_entry = ttk.Entry(main_frame, width=5, justify="center", font=("Segoe UI", 10))
-        key_entry.pack(pady=(0, 10))
-
-        # Submit function
-        def on_submit():
-            key = key_entry.get().lower().strip()
-            if not key or len(key) != 1:
-                messagebox.showerror("Invalid Input", "Please enter a single character (e.g., 'z').")
-                return
-
-            hotkey_parts = [k for k, v in modifiers.items() if v.get()]
-            hotkey_parts.append(key)
-            hotkey_str = " + ".join(hotkey_parts)
-            app.change_hotkey(hotkey_str)
+        def on_submit(event=None):
+            key = entry.get().strip().lower()
+            if len(key) == 1 and key.isalnum():
+                modifiers = []
+                if ctrl_var.get(): modifiers.append("ctrl")
+                if alt_var.get(): modifiers.append("alt")
+                if shift_var.get(): modifiers.append("shift")
+                if win_var.get(): modifiers.append("windows")
+                hotkey = " + ".join(modifiers + [key])
+                app.change_hotkey(hotkey)
             input_dialog.destroy()
             root.destroy()
 
-        # Submit button
-        ttk.Button(main_frame, text="Apply Hotkey", command=on_submit).pack(pady=10)
+        root = tk.Tk()
+        root.withdraw()
 
-        # Bind enter key
-        input_dialog.bind("<Return>", lambda e: on_submit())
+        input_dialog = tk.Toplevel()
+        input_dialog.title("Change Hotkey")
+        input_dialog.geometry("320x250")
+        input_dialog.configure(bg="#f0f0f0")
 
-        # Clean exit
+        style = ttk.Style()
+        style.theme_use("vista")
+        style.configure("TCheckbutton", font=('Segoe UI', 10), background="#f0f0f0", padding=6)
+        style.configure("TLabel", background="#f0f0f0", font=('Segoe UI', 10))
+        style.configure("TButton", font=('Segoe UI', 10))
+
+        label = ttk.Label(input_dialog, text="Select modifiers:")
+        label.pack(pady=(15, 5))
+
+        # Checkboxes for modifiers
+        ctrl_var = tk.BooleanVar()
+        alt_var = tk.BooleanVar()
+        shift_var = tk.BooleanVar()
+        win_var = tk.BooleanVar()
+
+        checkbox_frame = ttk.Frame(input_dialog)
+        checkbox_frame.pack()
+
+        ttk.Checkbutton(checkbox_frame, text="Ctrl", variable=ctrl_var).grid(row=0, column=0, padx=10, pady=5)
+        ttk.Checkbutton(checkbox_frame, text="Alt", variable=alt_var).grid(row=0, column=1, padx=10, pady=5)
+        ttk.Checkbutton(checkbox_frame, text="Shift", variable=shift_var).grid(row=1, column=0, padx=10, pady=5)
+        ttk.Checkbutton(checkbox_frame, text="Win", variable=win_var).grid(row=1, column=1, padx=10, pady=5)
+
+        key_label = ttk.Label(input_dialog, text="Enter single key (a–z, 0–9):")
+        key_label.pack(pady=(15, 5))
+
+        entry = ttk.Entry(input_dialog, width=10, font=('Segoe UI', 12))
+        entry.pack()
+
+        submit_btn = ttk.Button(input_dialog, text="Submit", command=on_submit)
+        submit_btn.pack(pady=15)
+
+        entry.bind("<Return>", on_submit)
         input_dialog.protocol("WM_DELETE_WINDOW", root.quit)
-        # Center the Toplevel window manually
-        input_dialog.update_idletasks()
-        w = input_dialog.winfo_width()
-        h = input_dialog.winfo_height()
-        x = (input_dialog.winfo_screenwidth() // 2) - (w // 2)
-        y = (input_dialog.winfo_screenheight() // 2) - (h // 2)
-        input_dialog.geometry(f"+{x}+{y}")
-        input_dialog.mainloop()
 
+        # Center on screen without `eval` (which is not available on Toplevel)
+        input_dialog.update_idletasks()
+        root.mainloop()
 
     threading.Thread(target=create_text_field).start()
 
