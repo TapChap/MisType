@@ -30,7 +30,7 @@ def changeHotkey():
                 if shift_var.get(): modifiers.append("shift")
                 if win_var.get(): modifiers.append("windows")
                 hotkey = " + ".join(modifiers + [key])
-                app.change_hotkey(hotkey)
+                app.change_mistype_hotkey(hotkey)
             input_dialog.destroy()
             root.destroy()
 
