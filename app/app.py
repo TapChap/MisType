@@ -94,6 +94,9 @@ def handle_dictionary_hotkey(keyboard):
     else:
         kb.write(dict_text)
 
+def open_dictionary():
+    os.startfile(phrase_dict.json_path)
+
 # ------
 def quit():
     kb.unhook_all()
