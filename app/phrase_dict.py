@@ -11,28 +11,22 @@ if not os.path.exists(json_path):
         json.dump({"initialize": 'init'}, f, indent=2)
 
 def __get_dict():
-    file = open(json_path, 'r', encoding='utf-8')
-    _dict = json.load(file)
-    file.close()
+    with open(json_path, 'r', encoding='utf-8') as file:
+       _dict = json.load(file)
     return _dict
 
 def __update_dict(_dict):
-    _current = __get_dict()
-    file = open(json_path, 'w', encoding='utf-8')
-
     if not _dict:
-        file.close()
         raise FileNotFoundError('key or value missing in update_dict method')
-    else:
-        _current.update(_dict)
+
+    _current = __get_dict()
+    _current.update(_dict)
+    with open(json_path, 'w', encoding='utf-8') as file:
         json.dump(_current, file)
 
-    file.close()
-
 def reset():
-    file = open(json_path, 'w', encoding='utf-8')
-    file.write('{}')
-    file.close()
+    with open(json_path, 'w', encoding='utf-8') as file:
+        json.dump({}, file)
 
 def get(key=''):
     saved_dict = __get_dict()
@@ -48,5 +42,4 @@ def add(key, val):
     __update_dict({key: val})
 
 if __name__ == '__main__':
-    add("טמבל", "טיפש ממש בלי לנשום")
     print(get())
