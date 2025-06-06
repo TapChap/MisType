@@ -1,17 +1,42 @@
-import json, os, sys
+import json, os
 
-try:
-    # PyInstaller creates a temp folder and stores the path in _MEIPASS
-    base_path = sys._MEIPASS
-except AttributeError:
-    base_path = os.path.abspath("..")  # fallback when running in development
+json_path = os.path.join(os.getenv('APPDATA'), 'MisType', 'saved_dict.json')
 
-file_path = os.path.join(base_path, 'phrase_dict.json')
+# Ensure directory exists
+os.makedirs(os.path.dirname(json_path), exist_ok=True)
 
-with open(file_path, 'r', encoding='utf-8') as file:
-    saved_dict = json.load(file)
+# initialize file if needed
+if not os.path.exists(json_path):
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump({"initialize": 'init'}, f, indent=2)
+
+def __get_dict():
+    file = open(json_path, 'r', encoding='utf-8')
+    _dict = json.load(file)
+    file.close()
+    return _dict
+
+def __update_dict(_dict):
+    _current = __get_dict()
+    file = open(json_path, 'w', encoding='utf-8')
+
+    if not _dict:
+        file.close()
+        raise FileNotFoundError('key or value missing in update_dict method')
+    else:
+        _current.update(_dict)
+        json.dump(_current, file)
+
+    file.close()
+
+def reset():
+    file = open(json_path, 'w', encoding='utf-8')
+    file.write('{}')
+    file.close()
 
 def get(key=''):
+    saved_dict = __get_dict()
+
     if not key:
         return saved_dict
 
@@ -20,15 +45,8 @@ def get(key=''):
     return saved_dict[key]
 
 def add(key, val):
-    new_dict = {key: val}
-    saved_dict.update(new_dict)
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(json.dumps(saved_dict))
+    __update_dict({key: val})
 
-def reset():
-    global saved_dict
-
-    c_file = open('../phrase_dict.json', 'w')
-    saved_dict = {}
-    c_file.write('{}')
-    c_file.close()
+if __name__ == '__main__':
+    add("טמבל", "טיפש ממש בלי לנשום")
+    print(get())

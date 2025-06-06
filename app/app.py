@@ -92,7 +92,7 @@ def handle_dictionary_hotkey(keyboard):
     if not dict_text:
         kb.write(text)
     else:
-        kb.write(phrase_dict.get(text))
+        kb.write(dict_text)
 
 # ------
 def quit():
