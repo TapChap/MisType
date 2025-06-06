@@ -18,7 +18,7 @@ def on_quit(icon):
     sys.exit()
 
 # Text input popup
-def changeHotkey():
+def change_mistype_hotkey():
     # Run tkinter in main thread
     def create_text_field():
         def on_submit(event=None):
@@ -92,15 +92,21 @@ def enable_clipboard_history():
     winreg.SetValueEx(key, "EnableClipboardHistory", 0, winreg.REG_DWORD, 1)
     winreg.CloseKey(key)
 
-    show_clipboard_toast()
-
-
-def show_clipboard_toast():
     toast(
         "📋 Clipboard History Enabled",
         "Press Win + V to access your clipboard history!",
         duration="short",  # or 'long'
         on_click=app.app_open_clipboard
+    )
+
+def open_dictionary():
+    app.open_dictionary()
+
+def change_dictionary_hotkey():
+    toast(
+        "Error, 400",
+        "This action isn't supported yet, Coming Soon!",
+        duration="short",  # or 'long'
     )
 
 # Setup tray icon
@@ -109,8 +115,10 @@ def setup_tray():
     icon.icon = get_image()
     icon.menu = Menu(
         MenuItem('Quit', on_quit),
-        MenuItem('Change MisType hotkey', changeHotkey),
-        MenuItem('Enable clipboard History', enable_clipboard_history)
+        MenuItem('Change MisType hotkey', change_mistype_hotkey),
+        MenuItem('Enable clipboard History', enable_clipboard_history),
+        MenuItem('Open Dictionary File', open_dictionary),
+        MenuItem('Change Dictionary hotkey', change_dictionary_hotkey)
     )
     icon.run()
 
