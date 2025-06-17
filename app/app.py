@@ -1,3 +1,5 @@
+import subprocess
+import sys
 import time, pyperclip, os
 import keyboard as kb
 import string_converter, phrase_dict
@@ -19,6 +21,8 @@ def waitUntilRelease(key):
 
 
 def handle_mistype_hotkey(keyboard):
+    print('mistype hotkey detected')
+
     keys = mistype_hotkey.split('+')
     for key in keys:
         waitUntilRelease(key)
@@ -98,6 +102,21 @@ def open_dictionary():
     os.startfile(phrase_dict.json_path)
 
 # ------
+
+def refresh_hotkeys():
+    kb.unhook_all_hotkeys()
+    bind_hotkeys()
+
+def restart_app():
+    # Full path to the Python interpreter
+    python_exe = sys.executable
+
+    # Full path to your target script
+    script_path = os.path.abspath("app.py")  # adjust path if needed
+
+    subprocess.Popen([python_exe, script_path])
+    exit(code=None)
+
 def quit():
     kb.unhook_all()
     os._exit(0)

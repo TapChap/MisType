@@ -2,6 +2,7 @@ from pystray import Icon, Menu, MenuItem
 from PIL import Image
 from win11toast import toast
 from tkinter import messagebox, ttk
+
 import tkinter as tk
 import threading, sys, app, os, winreg
 
@@ -15,6 +16,7 @@ def get_image():
 def on_quit(icon):
     app.quit()        # Your custom cleanup logic
     icon.stop()
+    # icon.
     sys.exit()
 
 # Text input popup
@@ -29,7 +31,7 @@ def change_mistype_hotkey():
                 if alt_var.get(): modifiers.append("alt")
                 if shift_var.get(): modifiers.append("shift")
                 if win_var.get(): modifiers.append("windows")
-                hotkey = " + ".join(modifiers + [key])
+                hotkey = "+".join(modifiers + [key])
                 app.change_mistype_hotkey(hotkey)
             input_dialog.destroy()
             root.destroy()
@@ -83,7 +85,7 @@ def change_mistype_hotkey():
 
     threading.Thread(target=create_text_field).start()
 
-def enable_clipboard_history():
+def enable_clipboard_history(icon):
     try:
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,r"Software\Microsoft\Clipboard", 0, winreg.KEY_SET_VALUE)
     except FileNotFoundError:
@@ -92,22 +94,24 @@ def enable_clipboard_history():
     winreg.SetValueEx(key, "EnableClipboardHistory", 0, winreg.REG_DWORD, 1)
     winreg.CloseKey(key)
 
-    toast(
-        "📋 Clipboard History Enabled",
-        "Press Win + V to access your clipboard history!",
-        duration="short",  # or 'long'
-        on_click=app.app_open_clipboard
-    )
+    icon.notify("Press Win + V to access your clipboard history!", title="📋 Clipboard History Enabled")
 
 def open_dictionary():
     app.open_dictionary()
 
 def change_dictionary_hotkey():
     toast(
-        "Error, 400",
-        "This action isn't supported yet, Coming Soon!",
+        "Action not available yet, Coming Soon!",
+        "Current hotkey: Alt + Shift + Q",
         duration="short",  # or 'long'
     )
+
+def refresh_hotkeys(icon):
+    try:
+        app.restart_app()
+    except SystemExit:
+        pass
+    icon.notify('Hotkeys Refreshed Successfully')
 
 # Setup tray icon
 def setup_tray():
@@ -118,7 +122,8 @@ def setup_tray():
         MenuItem('Change MisType hotkey', change_mistype_hotkey),
         MenuItem('Enable clipboard History', enable_clipboard_history),
         MenuItem('Open Dictionary File', open_dictionary),
-        MenuItem('Change Dictionary hotkey', change_dictionary_hotkey)
+        # MenuItem('Change Dictionary hotkey', change_dictionary_hotkey)
+        MenuItem('Refresh Hotkeys', refresh_hotkeys, default=True)
     )
     icon.run()
 
