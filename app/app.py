@@ -17,8 +17,9 @@ def waitUntilRelease(key):
         while kb.is_pressed(k):
             time.sleep(0.01)
 
-
 def handle_mistype_hotkey(keyboard):
+    print('mistype hotkey detected')
+
     keys = mistype_hotkey.split('+')
     for key in keys:
         waitUntilRelease(key)
@@ -43,9 +44,6 @@ def handle_mistype_hotkey(keyboard):
     # change pc language
     kb.press_and_release('alt + shift')
 
-def app_open_clipboard(__):
-    kb.press_and_release('win + v')
-
 def change_mistype_hotkey(new_hotkey):
     global mistype_hotkey
     mistype_hotkey = new_hotkey
@@ -54,8 +52,13 @@ def change_mistype_hotkey(new_hotkey):
     kb.add_hotkey(new_hotkey, lambda: handle_mistype_hotkey(Controller()))
 
 # -------------
+
+def app_open_clipboard():
+    kb.press_and_release('win + v')
+
+# -------------
 def handle_dictionary_hotkey(keyboard):
-    keys = mistype_hotkey.split('+')
+    keys = dictionary_hotkey.split('+')
     waitUntilRelease(keys)
 
     # select the last word
@@ -97,22 +100,22 @@ def handle_dictionary_hotkey(keyboard):
 def open_dictionary():
     os.startfile(phrase_dict.json_path)
 
-# ------
+# -------------
+
 def quit():
+    """Clean shutdown"""
     kb.unhook_all()
     os._exit(0)
-    exit(0)
-
-def bind_hotkeys():
-    kb.add_hotkey(dictionary_hotkey, lambda: handle_dictionary_hotkey(Controller()))
-    kb.add_hotkey(mistype_hotkey, lambda: handle_mistype_hotkey(Controller()))
 
 def main():
     global mistype_hotkey, dictionary_hotkey
+
     mistype_hotkey = 'alt+shift+z'
     dictionary_hotkey = 'alt+shift+q'
 
-    bind_hotkeys()
+    kb.add_hotkey(dictionary_hotkey, lambda: handle_dictionary_hotkey(Controller()))
+    kb.add_hotkey(mistype_hotkey, lambda: handle_mistype_hotkey(Controller()))
+
     kb.wait()
 
 if __name__ == '__main__':
