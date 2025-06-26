@@ -92,12 +92,7 @@ def enable_clipboard_history():
     winreg.SetValueEx(key, "EnableClipboardHistory", 0, winreg.REG_DWORD, 1)
     winreg.CloseKey(key)
 
-    toast(
-        "📋 Clipboard History Enabled",
-        "Press Win + V to access your clipboard history!",
-        duration="short",  # or 'long'
-        on_click=app.app_open_clipboard
-    )
+    app.app_open_clipboard()
 
 def open_dictionary():
     app.open_dictionary()
@@ -114,11 +109,11 @@ def setup_tray():
     icon = Icon("MisType")
     icon.icon = get_image()
     icon.menu = Menu(
-        MenuItem('Quit', on_quit),
         MenuItem('Change MisType hotkey', change_mistype_hotkey),
-        MenuItem('Enable clipboard History', enable_clipboard_history),
+        MenuItem('Open Clipboard (Copy History)', enable_clipboard_history),
         MenuItem('Open Dictionary File', open_dictionary),
-        MenuItem('Change Dictionary hotkey', change_dictionary_hotkey)
+        Menu.SEPARATOR,
+        MenuItem('Quit', on_quit)
     )
     icon.run()
 
