@@ -1,10 +1,14 @@
+import subprocess, threading, time, sys, os, winreg, app
+import tkinter as tk
+
+from tkinter import ttk
 from pystray import Icon, Menu, MenuItem
 from PIL import Image
 from win11toast import toast
-from tkinter import messagebox, ttk
 
-import tkinter as tk
-import threading, sys, app, os, winreg
+# Global variable to track the app process
+app_process = None
+app_running = False
 
 def get_image():
     try:
@@ -12,14 +16,96 @@ def get_image():
     except AttributeError:
         return Image.open('../translate_icon.ico')
 
-# Quit action
+def start_app_process():
+    """Start the app.py process"""
+    global app_process, app_running
+    try:
+        if getattr(sys, 'frozen', False):
+            # When running as exe, app.py is bundled inside the exe
+            # We cannot separate them, so we'll run the app logic in the same process
+            # This means we need to use threading instead of separate processes
+
+            # Start app in a separate thread instead of separate process
+            app_thread = threading.Thread(target=app.main, daemon=True)
+            app_thread.start()
+            app_running = True
+            return True
+
+        else:
+            # If running as Python script - separate processes work fine
+            app_script = os.path.join(os.path.dirname(__file__), 'app.py')
+            app_process = subprocess.Popen([sys.executable, app_script])
+            app_running = True
+            return True
+
+    except Exception as e:
+        print(f"Failed to start app process: {e}")
+        return False
+def stop_app_process():
+    """Stop the app.py process"""
+    global app_process, app_running
+
+    if getattr(sys, 'frozen', False):
+        # For exe (threading approach)
+        try:
+            app.quit()  # Call your app's quit function
+            app_running = False
+        except Exception as e:
+            print(f"Error stopping app thread: {e}")
+    else:
+        # For Python script (subprocess approach)
+        if app_process:
+            try:
+                app_process.terminate()
+                app_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                app_process.kill()
+            except Exception as e:
+                print(f"Error stopping app process: {e}")
+            finally:
+                app_process = None
+                app_running = False
+
+def restart_app(icon):
+    """Restart the app process"""
+    icon.notify('Restarting application...', title="🔄 Restart")
+
+    if getattr(sys, 'frozen', False):
+        # For exe - restart the entire exe since we can't restart just the thread cleanly
+        try:
+            exe_path = sys.executable
+            subprocess.Popen([exe_path])
+            time.sleep(1)
+            os._exit(0)
+        except Exception as e:
+            icon.notify(f'Restart failed: {str(e)}', title="❌ Error")
+    else:
+        # For Python script - use process restart
+        stop_app_process()
+        time.sleep(0.5)
+
+        if start_app_process():
+            icon.notify('Application restarted successfully!', title="✅ Restart")
+        else:
+            icon.notify('Failed to restart application', title="❌ Error")
+
+def check_app_status():
+    """Monitor the app process and restart if it crashes"""
+    global app_process, app_running
+    while True:
+        if app_running and app_process:
+            if app_process.poll() is not None:  # Process has ended
+                print("App process crashed, attempting restart...")
+                time.sleep(1)
+                start_app_process()
+        time.sleep(5)  # Check every 5 seconds
+
 def on_quit(icon):
-    app.quit()        # Your custom cleanup logic
+    """Quit both the app and tray"""
+    stop_app_process()
     icon.stop()
-    # icon.
     sys.exit()
 
-# Text input popup
 def change_mistype_hotkey():
     # Run tkinter in main thread
     def create_text_field():
@@ -85,7 +171,7 @@ def change_mistype_hotkey():
 
     threading.Thread(target=create_text_field).start()
 
-def enable_clipboard_history(icon):
+def enable_clipboard_history():
     try:
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,r"Software\Microsoft\Clipboard", 0, winreg.KEY_SET_VALUE)
     except FileNotFoundError:
@@ -94,7 +180,9 @@ def enable_clipboard_history(icon):
     winreg.SetValueEx(key, "EnableClipboardHistory", 0, winreg.REG_DWORD, 1)
     winreg.CloseKey(key)
 
-    icon.notify("Press Win + V to access your clipboard history!", title="📋 Clipboard History Enabled")
+    app.app_open_clipboard()
+
+    # icon.notify("Press Win + V to access your clipboard history!", title="📋 Clipboard History Enabled")
 
 def open_dictionary():
     app.open_dictionary()
@@ -106,33 +194,28 @@ def change_dictionary_hotkey():
         duration="short",  # or 'long'
     )
 
-def refresh_hotkeys(icon):
-    try:
-        app.restart_app()
-    except SystemExit:
-        pass
-    icon.notify('Hotkeys Refreshed Successfully')
-
-# Setup tray icon
 def setup_tray():
     icon = Icon("MisType")
     icon.icon = get_image()
     icon.menu = Menu(
-        MenuItem('Quit', on_quit),
+        MenuItem('Refresh Keybindings', restart_app, default=True),
+        Menu.SEPARATOR,
         MenuItem('Change MisType hotkey', change_mistype_hotkey),
-        MenuItem('Enable clipboard History', enable_clipboard_history),
+        MenuItem('Open Clipboard (Copy History)', enable_clipboard_history),
         MenuItem('Open Dictionary File', open_dictionary),
-        # MenuItem('Change Dictionary hotkey', change_dictionary_hotkey)
-        MenuItem('Refresh Hotkeys', refresh_hotkeys, default=True)
+        Menu.SEPARATOR,
+        MenuItem('Quit', on_quit)
     )
     icon.run()
 
 def main():
-    # Start tray icon in a background thread
-    tray_thread = threading.Thread(target=setup_tray, daemon=True)
-    tray_thread.start()
+    # Start the app process
+    start_app_process()
+    setup_tray()
 
-    app.main()
+    # Start monitoring thread
+    # monitor_thread = threading.Thread(target=check_app_status, daemon=True)
+    # monitor_thread.start()
 
 if __name__ == '__main__':
     main()
